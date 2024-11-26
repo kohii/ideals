@@ -75,7 +75,7 @@ abstract class FindDefinitionCommandBase extends LspCommand<Either<List<? extend
    */
   @Nullable
   private static Location findSourceLocation(@NotNull Project project, @NotNull PsiElement element) {
-    final var file = element.getContainingFile();
+    final var file = element.getContainingFile().getOriginalFile();
     final var doc = MiscUtil.getDocument(file);
     if (doc == null) {
       return null;

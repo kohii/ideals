@@ -14,9 +14,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4j.services.LanguageClient;
-import org.eclipse.lsp4j.services.LanguageClientAware;
-import org.eclipse.lsp4j.services.LanguageServer;
+import org.eclipse.lsp4j.jsonrpc.services.JsonDelegate;
+import org.eclipse.lsp4j.services.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rri.ideals.server.diagnostics.DiagnosticsListener;
@@ -185,13 +184,18 @@ public class LspServer implements LanguageServer, LanguageClientAware, LspSessio
   }
 
   @Override
-  public MyTextDocumentService getTextDocumentService() {
+  public TextDocumentService getTextDocumentService() {
     return myTextDocumentService;
   }
 
   @Override
-  public MyWorkspaceService getWorkspaceService() {
+  public WorkspaceService getWorkspaceService() {
     return myWorkspaceService;
+  }
+
+  @JsonDelegate
+  public ExperimentalProtocolExtensions getExperimentalProtocolExtensions() {
+    return myTextDocumentService;
   }
 
   @Override

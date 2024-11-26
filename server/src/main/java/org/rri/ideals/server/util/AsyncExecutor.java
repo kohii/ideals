@@ -96,7 +96,7 @@ public class AsyncExecutor<R> {
 
     public Builder<R> executorContext(@NotNull Project project, @NotNull String uri, @Nullable Position position) {
       this.project = project;
-      this.psiFile = MiscUtil.resolvePsiFile(project, LspPath.fromLspUri(uri));
+      this.psiFile = MiscUtil.resolvePsiFile(project, LspPath.fromLspUri(uri)).getOriginalFile();
       this.position = position;
       return this;
     }

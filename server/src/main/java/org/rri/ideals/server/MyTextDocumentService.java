@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.rri.ideals.server.codeactions.ActionData;
 import org.rri.ideals.server.codeactions.CodeActionService;
 import org.rri.ideals.server.completions.CompletionService;
+import org.rri.ideals.server.extensions.ClassFileContentsCommand;
 import org.rri.ideals.server.formatting.FormattingCommand;
 import org.rri.ideals.server.formatting.OnTypeFormattingCommand;
 import org.rri.ideals.server.hover.HoverCommand;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-public class MyTextDocumentService implements TextDocumentService {
+public class MyTextDocumentService implements TextDocumentService, ExperimentalProtocolExtensions {
 
   private static final Logger LOG = Logger.getInstance(MyTextDocumentService.class);
   private final @NotNull LspSession session;
@@ -229,9 +230,15 @@ public class MyTextDocumentService implements TextDocumentService {
         .runAsync(session.getProject(), params.getTextDocument(), params.getPosition());
   }
 
-    @Override
-    public CompletableFuture<Hover> hover(HoverParams params) {
-        return new HoverCommand()
-                .runAsync(session.getProject(), params.getTextDocument(), params.getPosition());
-    }
+  @Override
+  public CompletableFuture<Hover> hover(HoverParams params) {
+      return new HoverCommand()
+              .runAsync(session.getProject(), params.getTextDocument(), params.getPosition());
+  }
+
+  @Override
+  public CompletableFuture<String> classFileContents(TextDocumentIdentifier params) {
+    return new ClassFileContentsCommand()
+            .runAsync(session.getProject(), params);
+  }
 }

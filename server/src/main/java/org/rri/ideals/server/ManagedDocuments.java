@@ -227,7 +227,7 @@ final public class ManagedDocuments {
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private static boolean canAccept(@NotNull String uri) {
-    return uri.startsWith("file:/");
+    return uri.matches("^(file|jar|jrt):/.*");
   }
 
   private void applyContentChangeEventChanges(@NotNull Document doc, @NotNull List<TextDocumentContentChangeEvent> contentChanges) {
