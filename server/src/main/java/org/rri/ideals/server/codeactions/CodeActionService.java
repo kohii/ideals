@@ -71,50 +71,49 @@ public final class CodeActionService {
 
   @NotNull
   public WorkspaceEdit applyCodeAction(@NotNull ActionData actionData, String title, ExecutorContext executorContext) {
-    final var result = new WorkspaceEdit();
+    var result = new WorkspaceEdit();
     final var editor = executorContext.getEditor();
     final var psiFile = executorContext.getPsiFile();
     final var oldCopy = ((PsiFile) psiFile.copy());
 
-    ApplicationManager.getApplication().invokeAndWait(() -> {
-      final var actionInfo = ShowIntentionsPass.getActionsToShow(editor, psiFile);
+    final var actionInfo = ReadAction.compute(() -> ShowIntentionsPass.getActionsToShow(editor, psiFile));
 
-      var actionFound = Stream.of(
-              actionInfo.errorFixesToShow,
-              actionInfo.inspectionFixesToShow,
-              actionInfo.intentionsToShow)
-          .flatMap(Collection::stream)
-          .map(HighlightInfo.IntentionActionDescriptor::getAction)
-          .filter(it -> it.getText().equals(title))
-          .findFirst()
-          .orElse(null);
+    var actionFound = Stream.of(
+                    actionInfo.errorFixesToShow,
+                    actionInfo.inspectionFixesToShow,
+                    actionInfo.intentionsToShow)
+            .flatMap(Collection::stream)
+            .map(HighlightInfo.IntentionActionDescriptor::getAction)
+            .filter(it -> it.getText().equals(title))
+            .findFirst()
+            .orElse(null);
 
-      if (actionFound == null) {
-        LOG.warn("No action descriptor found: " + title);
-        return;
+    if (actionFound == null) {
+      LOG.warn("No action descriptor found: " + title);
+    } else {
+      ApplicationManager.getApplication().invokeAndWait(() -> {
+        CommandProcessor.getInstance().executeCommand(project, () -> {
+          if (actionFound.startInWriteAction()) {
+            WriteAction.run(() -> actionFound.invoke(project, editor, psiFile));
+          } else {
+            actionFound.invoke(project, editor, psiFile);
+          }
+        }, title, null);
+      });
+
+      final var oldDoc = ReadAction.compute(() -> MiscUtil.getDocument(oldCopy));
+      final var newDoc = editor.getDocument();
+
+      final var edits = TextUtil.textEditFromDocs(oldDoc, newDoc);
+
+      WriteCommandAction.runWriteCommandAction(project, () -> {
+        newDoc.setText(oldDoc.getText());
+        PsiDocumentManager.getInstance(project).commitDocument(newDoc);
+      });
+
+      if (!edits.isEmpty()) {
+        result.setChanges(Map.of(actionData.getUri(), edits));
       }
-
-      CommandProcessor.getInstance().executeCommand(project, () -> {
-        if (actionFound.startInWriteAction()) {
-          WriteAction.run(() -> actionFound.invoke(project, editor, psiFile));
-        } else {
-          actionFound.invoke(project, editor, psiFile);
-        }
-      }, title, null);
-    });
-
-    final var oldDoc = ReadAction.compute(() -> MiscUtil.getDocument(oldCopy));
-    final var newDoc = editor.getDocument();
-
-    final var edits = TextUtil.textEditFromDocs(oldDoc, newDoc);
-
-    WriteCommandAction.runWriteCommandAction(project, () -> {
-      newDoc.setText(oldDoc.getText());
-      PsiDocumentManager.getInstance(project).commitDocument(newDoc);
-    });
-
-    if (!edits.isEmpty()) {
-      result.setChanges(Map.of(actionData.getUri(), edits));
     }
 
     return result;
