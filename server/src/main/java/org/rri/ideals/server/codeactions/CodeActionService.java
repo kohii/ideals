@@ -84,7 +84,7 @@ public final class CodeActionService {
                     actionInfo.intentionsToShow)
             .flatMap(Collection::stream)
             .map(HighlightInfo.IntentionActionDescriptor::getAction)
-            .filter(it -> it.getText().equals(title))
+            .filter(it -> ReadAction.compute(() -> it.getText().equals(title)))
             .findFirst()
             .orElse(null);
 
