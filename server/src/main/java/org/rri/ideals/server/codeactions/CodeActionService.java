@@ -56,6 +56,7 @@ public final class CodeActionService {
     final var intentionActions = Stream.of(
             actionInfo.intentionsToShow)
         .flatMap(Collection::stream)
+        .filter(it -> !ReadAction.compute(() -> it.getAction().getText().equals("Inject language or reference")))
         .map(it -> toCodeAction(path, range, it, CodeActionKind.Refactor));
 
     final var quickFixes = Stream.of(
