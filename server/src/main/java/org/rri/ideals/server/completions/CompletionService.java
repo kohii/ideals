@@ -319,8 +319,17 @@ final public class CompletionService implements Disposable {
               }
           ), new LspProgressIndicator(cancelChecker));
       ReadAction.run(() -> {
+        Integer version = completionDataVersionRef.get();
+        if (version == null) {
+          version = cachedDataRef.get().version + 1;
+        }
+        List<LookupElementWithMatcher> lookupElements = lookupElementsWithMatcherRef.get();
+        if (lookupElements == null) {
+          resultRef.set(List.of());
+          return;
+        }
         resultRef.set(convertLookupElementsWithMatcherToCompletionItems(
-            lookupElementsWithMatcherRef.get(), editor.getDocument(), MiscUtil.offsetToPosition(editor.getDocument(), editor.getCaretModel().getOffset()), completionDataVersionRef.get()));
+            lookupElements, editor.getDocument(), MiscUtil.offsetToPosition(editor.getDocument(), editor.getCaretModel().getOffset()), version));
       });
     } finally {
       WriteCommandAction.runWriteCommandAction(project, () -> Disposer.dispose(process));
