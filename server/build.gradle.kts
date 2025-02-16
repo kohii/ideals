@@ -1,3 +1,4 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 
 plugins {
@@ -22,10 +23,12 @@ dependencies {
   implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.17.0")
   implementation("io.github.furstenheim:copy_down:1.1")
   testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+  testImplementation("junit:junit:4.13.2")
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
 
   intellijPlatform {
     intellijIdeaCommunity("2024.3")
+    testFramework(TestFrameworkType.Platform)
 
     bundledPlugin("com.intellij.java")
     bundledPlugin("org.jetbrains.kotlin")
