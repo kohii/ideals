@@ -29,7 +29,7 @@ dependencies {
 
     bundledPlugin("com.intellij.java")
     bundledPlugin("org.jetbrains.kotlin")
-    plugin("PythonCore:243.22562.145")
+    plugin("PythonCore:243.21565.193")
   }
 }
 
