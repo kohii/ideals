@@ -4,6 +4,7 @@ import com.intellij.ide.actions.searcheverywhere.FoundItemDescriptor;
 import com.intellij.ide.actions.searcheverywhere.SearchEverywhereToggleAction;
 import com.intellij.ide.actions.searcheverywhere.SymbolSearchEverywhereContributor;
 import com.intellij.navigation.NavigationItem;
+import com.intellij.openapi.actionSystem.ActionUiKind;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.application.ApplicationManager;
@@ -75,7 +76,7 @@ final public class WorkspaceSymbolService {
     ApplicationManager.getApplication().invokeAndWait(
         () -> {
           final var context = SimpleDataContext.getProjectContext(project);
-          final var event = AnActionEvent.createFromDataContext("keyboard shortcut", null, context);
+          final var event = AnActionEvent.createEvent(context, null, "keyboard shortcut", ActionUiKind.NONE, null);
           final var contributor = new SymbolSearchEverywhereContributor(event);
           if (!pattern.isEmpty()) {
             final var actions = contributor.getActions(() -> {
