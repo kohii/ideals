@@ -401,11 +401,11 @@ final public class CompletionService implements Disposable {
           CompletionInfo completionInfo = new CompletionInfo(editor, project);
 
           //noinspection UnstableApiUsage
-          var target =
-              IdeDocumentationTargetProvider.getInstance(project).documentationTarget(editor,
+          var targets =
+              IdeDocumentationTargetProvider.getInstance(project).documentationTargets(editor,
                   copyToInsert, cachedLookupElementWithMatcher.lookupElement());
-          if (target != null) {
-            unresolved.setDocumentation(toLspDocumentation(target));
+          if (!targets.isEmpty()) {
+            unresolved.setDocumentation(toLspDocumentation(targets.get(0)));
           }
 
           handleInsert(cachedData, cachedLookupElementWithMatcher, editor, copyToInsert, completionInfo);
