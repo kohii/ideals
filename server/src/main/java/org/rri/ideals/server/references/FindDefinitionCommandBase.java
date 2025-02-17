@@ -152,12 +152,14 @@ abstract class FindDefinitionCommandBase extends LspCommand<Either<List<? extend
             FlowKt.asFlow(Collections.singletonList(new EditorCompositeModel(editorsWithProviders))),
             project,
             new kotlinx.coroutines.CoroutineScope() {
+              private final kotlin.coroutines.CoroutineContext context = kotlinx.coroutines.Dispatchers.getDefault().plus(kotlinx.coroutines.JobKt.Job(null));
               @NotNull
               @Override
               public kotlin.coroutines.CoroutineContext getCoroutineContext() {
-                return kotlinx.coroutines.Dispatchers.getDefault();
+                return context;
               }
-            });
+            }
+    );
   }
 
 
