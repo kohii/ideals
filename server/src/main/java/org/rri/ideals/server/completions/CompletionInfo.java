@@ -7,6 +7,7 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementPresentation;
 import com.intellij.codeInsight.lookup.impl.LookupImpl;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.client.ClientSessionsManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -63,7 +64,9 @@ public class CompletionInfo {
         process,
         finalOffsets);
     arranger = new LookupArrangerImpl(parameters);
-    lookup = new LookupImpl(project, editor, arranger);
+
+    var session = ClientSessionsManager.getProjectSession(project);
+    lookup = new LookupImpl(session, editor, arranger);
   }
   @NotNull
   public CompletionInitializationContext getInitContext() {
