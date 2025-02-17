@@ -61,8 +61,8 @@ public class DefinitionFromLibrarySourcesTest extends LspLightBasePlatformTestCa
           Set.of(
               new LocationLink(
                   uri,
-                  new Range(new Position(6, 13), new Position(6, 25)),
-                  new Range(new Position(6, 13), new Position(6, 25)),
+                  new Range(new Position(7, 13), new Position(7, 25)),
+                  new Range(new Position(7, 13), new Position(7, 25)),
                   new Range(new Position(3, 4), new Position(3, 16))
               )
           ),
