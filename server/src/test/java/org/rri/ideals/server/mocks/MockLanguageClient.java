@@ -42,7 +42,7 @@ public class MockLanguageClient implements MyLanguageClient {
 
   @Override
   public void publishDiagnostics(PublishDiagnosticsParams diagnostics) {
-    Optional.of(diagnosticsFuture.get()).ifPresent(it -> it.complete(diagnostics));
+    Optional.ofNullable(diagnosticsFuture.get()).ifPresent(it -> it.complete(diagnostics));
   }
 
   @SuppressWarnings("unused")
