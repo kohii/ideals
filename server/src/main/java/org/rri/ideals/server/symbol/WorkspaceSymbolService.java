@@ -4,7 +4,6 @@ import com.intellij.ide.actions.searcheverywhere.FoundItemDescriptor;
 import com.intellij.ide.actions.searcheverywhere.SearchEverywhereToggleAction;
 import com.intellij.ide.actions.searcheverywhere.SymbolSearchEverywhereContributor;
 import com.intellij.navigation.NavigationItem;
-import com.intellij.navigation.ItemPresentation;
 import com.intellij.openapi.actionSystem.ActionUiKind;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
@@ -21,15 +20,9 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.psi.search.SearchScope;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.containers.ContainerUtil;
-import org.eclipse.lsp4j.Location;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.SymbolKind;
-import org.eclipse.lsp4j.WorkspaceSymbol;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import org.eclipse.lsp4j.jsonrpc.CompletableFutures;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
@@ -38,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 import org.rri.ideals.server.LspPath;
 import org.rri.ideals.server.symbol.util.SymbolUtil;
 import org.rri.ideals.server.util.MiscUtil;
-import javax.swing.Icon;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,7 +39,6 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Stream;
 
 @Service(Service.Level.PROJECT)
 final public class WorkspaceSymbolService {
@@ -157,7 +148,6 @@ final public class WorkspaceSymbolService {
     // Sort by weight first, then by isProjectFile (project files first), then by name
     allSymbols.sort(
         COMP.thenComparing((a, b) -> Boolean.compare(b.isProjectFile(), a.isProjectFile()))
-            .thenComparing(a -> a.symbol().getName())
     );
     return allSymbols;
   }
