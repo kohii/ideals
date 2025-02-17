@@ -30,7 +30,7 @@ public class DocumentHighlightCommandTest extends ReferencesCommandTestBase {
 
     // Test variable
     var answers = Set.of(
-        new DocumentHighlight(TestUtil.newRange(1, 14, 1, 17), DocumentHighlightKind.Text),
+        new DocumentHighlight(TestUtil.newRange(1, 14, 1, 17), DocumentHighlightKind.Write),
         new DocumentHighlight(TestUtil.newRange(13, 4, 13, 7), DocumentHighlightKind.Write));
     checkHighlight(answers, new Position(1, 14), path);
 
