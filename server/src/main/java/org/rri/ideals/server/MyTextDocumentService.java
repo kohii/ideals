@@ -1,10 +1,8 @@
 package org.rri.ideals.server;
 
 import com.google.gson.GsonBuilder;
-import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
-import com.intellij.psi.PsiFile;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.CompletableFutures;
@@ -24,7 +22,6 @@ import org.rri.ideals.server.signature.SignatureHelpService;
 import org.rri.ideals.server.symbol.DocumentSymbolService;
 import org.rri.ideals.server.util.AsyncExecutor;
 import org.rri.ideals.server.util.Metrics;
-import org.rri.ideals.server.util.MiscUtil;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -51,12 +48,6 @@ public class MyTextDocumentService implements TextDocumentService, ExperimentalP
       if (DumbService.isDumb(session.getProject())) {
         LOG.debug("Sending indexing started: " + path);
         LspContext.getContext(session.getProject()).getClient().notifyIndexStarted();
-      } else {
-        // Start the daemon analyzer for the file
-        PsiFile psiFile = MiscUtil.resolvePsiFile(session.getProject(), path);
-        if (psiFile != null) {
-          DaemonCodeAnalyzer.getInstance(session.getProject()).restart(psiFile);
-        }
       }
   /*  todo
         val projectSdk = ProjectRootManager.getInstance(project).projectSdk
