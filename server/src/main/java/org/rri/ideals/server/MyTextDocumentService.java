@@ -110,9 +110,13 @@ public class MyTextDocumentService implements TextDocumentService, ExperimentalP
   @SuppressWarnings("deprecation")
   @Override
   public CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> documentSymbol(DocumentSymbolParams params) {
+    final var uri = params.getTextDocument().getUri();
+    if (uri.startsWith("output:")) {
+      return CompletableFuture.completedFuture(List.of());
+    }
     final var client = AsyncExecutor.<List<Either<SymbolInformation, DocumentSymbol>>>builder()
         .cancellable(true)
-        .executorContext(session.getProject(), params.getTextDocument().getUri(), null)
+        .executorContext(session.getProject(), uri, null)
         .build();
 
     return client.compute((executorContext -> documentSymbols().computeDocumentSymbols(executorContext)));

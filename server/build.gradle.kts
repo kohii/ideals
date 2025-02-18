@@ -1,9 +1,10 @@
-import org.jetbrains.intellij.tasks.RunIdeTask
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 
 plugins {
   id("java")
   // id("org.jetbrains.kotlin.jvm") version "1.7.0"
-  id("org.jetbrains.intellij") version "1.17.2"
+  id("org.jetbrains.intellij.platform") version "2.2.1"
 }
 
 group = "org.rri.ideals.server"
@@ -11,23 +12,28 @@ version = System.getenv("IDEALS_VERSION") ?: "1.0-SNAPSHOT"
 
 repositories {
   mavenCentral()
+
+  intellijPlatform {
+    defaultRepositories()
+    marketplace()
+  }
 }
 
 dependencies {
   implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.17.0")
   implementation("io.github.furstenheim:copy_down:1.1")
   testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+  testImplementation("junit:junit:4.13.2")
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
-}
 
-// Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-intellij {
-  version.set("2023.3")
-  type.set("IC") // Target IDE Platform
-  pluginsRepositories {
-    marketplace()
+  intellijPlatform {
+    intellijIdeaCommunity("2024.3")
+    testFramework(TestFrameworkType.Platform)
+
+    bundledPlugin("com.intellij.java")
+    bundledPlugin("org.jetbrains.kotlin")
+    plugin("PythonCore:243.21565.193")
   }
-  plugins.set(listOf("Kotlin", "java", "PythonCore:233.11799.300"))
 }
 
 tasks.register<RunIdeTask>("plainIdea") {
@@ -82,8 +88,7 @@ tasks {
   }
 
   patchPluginXml {
-    version.set(System.getenv("IDEALS_VERSION"))
-    // sinceBuild.set("233")
+    version = System.getenv("IDEALS_VERSION")
   }
 
   signPlugin {

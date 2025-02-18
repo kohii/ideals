@@ -5,13 +5,13 @@ import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess;
 import com.intellij.testFramework.PsiTestUtil;
-import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.rri.ideals.server.LspLightBasePlatformTestCase;
 import org.rri.ideals.server.LspPath;
 import org.rri.ideals.server.TestUtil;
 
@@ -19,9 +19,8 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
-
 @RunWith(JUnit4.class)
-public class DefinitionFromLibrarySourcesTest extends LightJavaCodeInsightFixtureTestCase {
+public class DefinitionFromLibrarySourcesTest extends LspLightBasePlatformTestCase {
   @Override
   protected String getTestDataPath() {
     return Paths.get("test-data/references/java/project-definition-from-lib-sources").toAbsolutePath().toString();
@@ -62,8 +61,8 @@ public class DefinitionFromLibrarySourcesTest extends LightJavaCodeInsightFixtur
           Set.of(
               new LocationLink(
                   uri,
-                  new Range(new Position(6, 13), new Position(6, 25)),
-                  new Range(new Position(6, 13), new Position(6, 25)),
+                  new Range(new Position(7, 13), new Position(7, 25)),
+                  new Range(new Position(7, 13), new Position(7, 25)),
                   new Range(new Position(3, 4), new Position(3, 16))
               )
           ),

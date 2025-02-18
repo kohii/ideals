@@ -319,8 +319,17 @@ final public class CompletionService implements Disposable {
               }
           ), new LspProgressIndicator(cancelChecker));
       ReadAction.run(() -> {
+        Integer version = completionDataVersionRef.get();
+        if (version == null) {
+          version = cachedDataRef.get().version + 1;
+        }
+        List<LookupElementWithMatcher> lookupElements = lookupElementsWithMatcherRef.get();
+        if (lookupElements == null) {
+          resultRef.set(List.of());
+          return;
+        }
         resultRef.set(convertLookupElementsWithMatcherToCompletionItems(
-            lookupElementsWithMatcherRef.get(), editor.getDocument(), MiscUtil.offsetToPosition(editor.getDocument(), editor.getCaretModel().getOffset()), completionDataVersionRef.get()));
+            lookupElements, editor.getDocument(), MiscUtil.offsetToPosition(editor.getDocument(), editor.getCaretModel().getOffset()), version));
       });
     } finally {
       WriteCommandAction.runWriteCommandAction(project, () -> Disposer.dispose(process));
@@ -392,11 +401,11 @@ final public class CompletionService implements Disposable {
           CompletionInfo completionInfo = new CompletionInfo(editor, project);
 
           //noinspection UnstableApiUsage
-          var target =
-              IdeDocumentationTargetProvider.getInstance(project).documentationTarget(editor,
+          var targets =
+              IdeDocumentationTargetProvider.getInstance(project).documentationTargets(editor,
                   copyToInsert, cachedLookupElementWithMatcher.lookupElement());
-          if (target != null) {
-            unresolved.setDocumentation(toLspDocumentation(target));
+          if (!targets.isEmpty()) {
+            unresolved.setDocumentation(toLspDocumentation(targets.get(0)));
           }
 
           handleInsert(cachedData, cachedLookupElementWithMatcher, editor, copyToInsert, completionInfo);
@@ -479,17 +488,21 @@ final public class CompletionService implements Disposable {
   @NotNull
   private static Either<String, MarkupContent> toLspDocumentation(@NotNull DocumentationTarget target) {
     try {
-      //noinspection OverrideOnly
-      DocumentationData res = ImplKt.computeDocumentationBlocking(target.createPointer());
-      if (res == null) {
-        return Either.forRight(null);
-      }
-      var html = res.getHtml();
-      var htmlToMarkdownConverter = new CopyDown();
-      var ans = htmlToMarkdownConverter.convert(html);
-      return Either.forRight(new MarkupContent(MarkupKind.MARKDOWN, ans));
+      var future = ApplicationManager.getApplication().executeOnPooledThread(() -> {
+        var res = ImplKt.computeDocumentationBlocking(target.createPointer());
+        if (res == null) {
+          return null;
+        }
+        var html = res.getHtml();
+        var htmlToMarkdownConverter = new CopyDown();
+        var ans = htmlToMarkdownConverter.convert(html);
+        return new MarkupContent(MarkupKind.MARKDOWN, ans);
+      });
+      var result = future.get();
+      return result != null ? Either.forRight(result) : Either.forRight(null);
     } catch (Exception e) {
-      throw MiscUtil.wrap(e);
+      LOG.error("Failed to compute documentation", e);
+      return Either.forRight(null);
     }
   }
 

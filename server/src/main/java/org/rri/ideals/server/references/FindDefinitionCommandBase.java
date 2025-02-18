@@ -6,11 +6,13 @@ import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.ex.FileEditorWithProvider;
 import com.intellij.openapi.fileEditor.impl.EditorComposite;
+import com.intellij.openapi.fileEditor.impl.EditorCompositeModel;
 import com.intellij.openapi.fileEditor.impl.EditorFileSwapper;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import kotlinx.coroutines.flow.FlowKt;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.Range;
@@ -22,6 +24,7 @@ import org.rri.ideals.server.commands.ExecutorContext;
 import org.rri.ideals.server.commands.LspCommand;
 import org.rri.ideals.server.util.MiscUtil;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -144,7 +147,19 @@ abstract class FindDefinitionCommandBase extends LspCommand<Either<List<? extend
           assert editor.isValid();
           return new FileEditorWithProvider(editor, provider);
         }).toList();
-    return new EditorComposite(file, editorsWithProviders, project);
+    return new EditorComposite(
+            file,
+            FlowKt.asFlow(Collections.singletonList(new EditorCompositeModel(editorsWithProviders))),
+            project,
+            new kotlinx.coroutines.CoroutineScope() {
+              private final kotlin.coroutines.CoroutineContext context = kotlinx.coroutines.Dispatchers.getDefault().plus(kotlinx.coroutines.JobKt.Job(null));
+              @NotNull
+              @Override
+              public kotlin.coroutines.CoroutineContext getCoroutineContext() {
+                return context;
+              }
+            }
+    );
   }
 
 

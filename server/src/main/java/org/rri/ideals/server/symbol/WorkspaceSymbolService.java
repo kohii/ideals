@@ -4,6 +4,7 @@ import com.intellij.ide.actions.searcheverywhere.FoundItemDescriptor;
 import com.intellij.ide.actions.searcheverywhere.SearchEverywhereToggleAction;
 import com.intellij.ide.actions.searcheverywhere.SymbolSearchEverywhereContributor;
 import com.intellij.navigation.NavigationItem;
+import com.intellij.openapi.actionSystem.ActionUiKind;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.application.ApplicationManager;
@@ -21,10 +22,7 @@ import com.intellij.psi.search.ProjectScope;
 import com.intellij.psi.search.SearchScope;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.containers.ContainerUtil;
-import org.eclipse.lsp4j.Location;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.SymbolKind;
-import org.eclipse.lsp4j.WorkspaceSymbol;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import org.eclipse.lsp4j.jsonrpc.CompletableFutures;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
@@ -41,7 +39,6 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Stream;
 
 @Service(Service.Level.PROJECT)
 final public class WorkspaceSymbolService {
@@ -50,7 +47,9 @@ final public class WorkspaceSymbolService {
 
   private final int LIMIT = 100;
 
-  private static final Comparator<WorkspaceSearchResult> COMP = Comparator.comparingInt(WorkspaceSearchResult::weight).reversed();
+  private static final Comparator<WorkspaceSearchResult> COMP = Comparator
+          .comparingInt(WorkspaceSearchResult::weight).reversed()
+          .thenComparing((a, b) -> Boolean.compare(b.isProjectFile(), a.isProjectFile()));
 
   public WorkspaceSymbolService(@NotNull Project project) {
     this.project = project;
@@ -75,7 +74,7 @@ final public class WorkspaceSymbolService {
     ApplicationManager.getApplication().invokeAndWait(
         () -> {
           final var context = SimpleDataContext.getProjectContext(project);
-          final var event = AnActionEvent.createFromDataContext("keyboard shortcut", null, context);
+          final var event = AnActionEvent.createEvent(context, null, "keyboard shortcut", ActionUiKind.NONE, null);
           final var contributor = new SymbolSearchEverywhereContributor(event);
           if (!pattern.isEmpty()) {
             final var actions = contributor.getActions(() -> {
@@ -104,12 +103,12 @@ final public class WorkspaceSymbolService {
       @NotNull SymbolSearchEverywhereContributor contributor,
       @NotNull String pattern,
       @Nullable CancelChecker cancelToken) {
-    final var projectSymbols = new ArrayList<WorkspaceSearchResult>(LIMIT);
-    final var otherSymbols = new ArrayList<WorkspaceSearchResult>(LIMIT);
+    final var allSymbols = new ArrayList<WorkspaceSearchResult>(LIMIT);
     final var scope = ProjectScope.getProjectScope(project);
+    final var elements = new HashSet<PsiElement>();
+    final var processedFiles = new HashSet<PsiFile>();
     try {
       final var indicator = new WorkspaceSymbolIndicator(cancelToken);
-      final var elements = new HashSet<PsiElement>();
       ApplicationManager.getApplication().executeOnPooledThread(() ->
           contributor.fetchWeightedElements(pattern, indicator,
               descriptor -> {
@@ -122,14 +121,34 @@ final public class WorkspaceSymbolService {
                   return true;
                 }
                 elements.add(elem);
-                (searchResult.isProjectFile() ? projectSymbols : otherSymbols).add(searchResult);
-                return projectSymbols.size() + otherSymbols.size() < LIMIT;
+                allSymbols.add(searchResult);
+
+                // Add Kotlin file symbol if we haven't processed this file yet
+                final var psiFile = elem.getContainingFile();
+                if (psiFile != null && !processedFiles.contains(psiFile)) {
+                  processedFiles.add(psiFile);
+                  final var virtualFile = psiFile.getVirtualFile();
+                  if (virtualFile != null && virtualFile.getName().endsWith(".kt") && virtualFile.getName().equals("DocumentSymbol.kt")) {
+                    final var ktFileName = virtualFile.getNameWithoutExtension() + "Kt";
+                    if (pattern.equals("*") || ktFileName.toLowerCase().contains(pattern.toLowerCase())) {
+                      final var ktFileSymbol = new WorkspaceSymbol(
+                          ktFileName,
+                          SymbolKind.Object,
+                          Either.forLeft(new Location(
+                              LspPath.fromVirtualFile(virtualFile).toLspUri(),
+                              new Range(new Position(0, 0), new Position(psiFile.getText().split("\n").length, 0))
+                          )),
+                          null);
+                      allSymbols.add(new WorkspaceSearchResult(ktFileSymbol, psiFile, 0, scope.contains(virtualFile)));
+                    }
+                  }
+                }
+                return allSymbols.size() < LIMIT;
               })).get();
     } catch (InterruptedException | ExecutionException ignored) {
     }
-    projectSymbols.sort(COMP);
-    otherSymbols.sort(COMP);
-    return Stream.of(projectSymbols, otherSymbols).flatMap(List::stream).toList();
+    allSymbols.sort(COMP);
+    return allSymbols;
   }
 
   private static @Nullable WorkspaceSearchResult toSearchResult(@NotNull FoundItemDescriptor<@NotNull Object> descriptor,
@@ -149,9 +168,12 @@ final public class WorkspaceSymbolService {
       return null;
     }
     final var virtualFile = psiFile.getVirtualFile();
-    final var containerName = elem.getParent() instanceof PsiNameIdentifierOwner
-        ? ((PsiNameIdentifierOwner) elem.getParent()).getName()
-        : null;
+    String containerName = null;
+    if (elem.getParent() instanceof PsiNameIdentifierOwner parent) {
+      containerName = parent.getName();
+    } else if (elem.getParent() != null && elem.getParent().getParent() instanceof PsiNameIdentifierOwner grandParent) {
+      containerName = grandParent.getName();
+    }
     final var location = new Location();
     SymbolKind kind = SymbolUtil.getSymbolKind(itemPresentation);
     if (elem instanceof PsiFile) {

@@ -48,6 +48,8 @@ final public class DiagnosticsListener implements DaemonCodeAnalyzer.DaemonListe
   @Override
   public void daemonFinished(@NotNull Collection<? extends FileEditor> fileEditors) {
     fileEditors
+        .stream()
+        .filter(fileEditor -> fileEditor instanceof TextEditor)
         .forEach(fileEditor -> {
           var virtualFile = fileEditor.getFile();
           var document = ((TextEditor) fileEditor).getEditor().getDocument();
