@@ -47,7 +47,9 @@ final public class WorkspaceSymbolService {
 
   private final int LIMIT = 100;
 
-  private static final Comparator<WorkspaceSearchResult> COMP = Comparator.comparingInt(WorkspaceSearchResult::weight).reversed();
+  private static final Comparator<WorkspaceSearchResult> COMP = Comparator
+          .comparingInt(WorkspaceSearchResult::weight).reversed()
+          .thenComparing((a, b) -> Boolean.compare(b.isProjectFile(), a.isProjectFile()));
 
   public WorkspaceSymbolService(@NotNull Project project) {
     this.project = project;
@@ -145,10 +147,7 @@ final public class WorkspaceSymbolService {
               })).get();
     } catch (InterruptedException | ExecutionException ignored) {
     }
-    // Sort by weight first, then by isProjectFile (project files first), then by name
-    allSymbols.sort(
-        COMP.thenComparing((a, b) -> Boolean.compare(b.isProjectFile(), a.isProjectFile()))
-    );
+    allSymbols.sort(COMP);
     return allSymbols;
   }
 
