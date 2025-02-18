@@ -488,17 +488,21 @@ final public class CompletionService implements Disposable {
   @NotNull
   private static Either<String, MarkupContent> toLspDocumentation(@NotNull DocumentationTarget target) {
     try {
-      //noinspection OverrideOnly
-      DocumentationData res = ImplKt.computeDocumentationBlocking(target.createPointer());
-      if (res == null) {
-        return Either.forRight(null);
-      }
-      var html = res.getHtml();
-      var htmlToMarkdownConverter = new CopyDown();
-      var ans = htmlToMarkdownConverter.convert(html);
-      return Either.forRight(new MarkupContent(MarkupKind.MARKDOWN, ans));
+      var future = ApplicationManager.getApplication().executeOnPooledThread(() -> {
+        var res = ImplKt.computeDocumentationBlocking(target.createPointer());
+        if (res == null) {
+          return null;
+        }
+        var html = res.getHtml();
+        var htmlToMarkdownConverter = new CopyDown();
+        var ans = htmlToMarkdownConverter.convert(html);
+        return new MarkupContent(MarkupKind.MARKDOWN, ans);
+      });
+      var result = future.get();
+      return result != null ? Either.forRight(result) : Either.forRight(null);
     } catch (Exception e) {
-      throw MiscUtil.wrap(e);
+      LOG.error("Failed to compute documentation", e);
+      return Either.forRight(null);
     }
   }
 
