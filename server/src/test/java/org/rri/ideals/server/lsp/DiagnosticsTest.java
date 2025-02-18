@@ -65,16 +65,18 @@ public class DiagnosticsTest extends LspServerTestBase {
 
     server().getTextDocumentService().didChange(params);
 
-
     final var diagnosticsParams = client().waitAndGetDiagnosticsPublished();
 
     Assert.assertEquals(filePath, LspPath.fromLspUri(diagnosticsParams.getUri()));
-    Assert.assertEquals(1, diagnosticsParams.getDiagnostics().size());
+    Assert.assertEquals(2, diagnosticsParams.getDiagnostics().size());
 
+    final var diagnostic1 = diagnosticsParams.getDiagnostics().get(0);
+    Assert.assertEquals("Not a statement", diagnostic1.getMessage());
+    Assert.assertEquals(new Range(new Position(3, 14), new Position(3, 15)), diagnostic1.getRange());
 
-    final var diagnostic = diagnosticsParams.getDiagnostics().get(0);
-    Assert.assertEquals("Expression expected", diagnostic.getMessage());
-    Assert.assertEquals(new Range(new Position(3, 15), new Position(3, 16)), diagnostic.getRange());
+    final var diagnostic2 = diagnosticsParams.getDiagnostics().get(1);
+    Assert.assertEquals("Expression expected", diagnostic2.getMessage());
+    Assert.assertEquals(new Range(new Position(3, 15), new Position(3, 16)), diagnostic2.getRange());
   }
 
   private void sendOpen(@NotNull LspPath filePath) {
