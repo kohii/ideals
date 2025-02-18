@@ -40,11 +40,16 @@ public abstract class LspServerRunnerBase {
 
   public CompletableFuture<Void> launch() {
     prepareForListening();
-    try {
-      //noinspection UnstableApiUsage
-      IconManager.Companion.activate(new CoreIconManager());
-    } catch (Throwable e) {
-      LOG.warn("Core icon manager can't be loaded:\n" + e);
+    if (!isMultiConnection) {
+      // Skip icon manager activation in STDIO mode to avoid UI-related errors
+      LOG.info("Skipping icon manager activation in STDIO mode");
+    } else {
+      try {
+        //noinspection UnstableApiUsage
+        IconManager.Companion.activate(new CoreIconManager());
+      } catch (Throwable e) {
+        LOG.warn("Core icon manager can't be loaded:\n" + e);
+      }
     }
     return CompletableFuture.runAsync(() -> {
       while (true) {
