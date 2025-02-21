@@ -23,11 +23,13 @@ import org.rri.ideals.server.commands.ExecutorContext;
 import org.rri.ideals.server.util.MiscUtil;
 import org.rri.ideals.server.util.TextUtil;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.rri.ideals.server.util.MiscUtil.distinctByKey;
 
 @Service(Service.Level.PROJECT)
 public final class CodeActionService {
@@ -37,12 +39,6 @@ public final class CodeActionService {
 
   public CodeActionService(@NotNull Project project) {
     this.project = project;
-  }
-
-  @NotNull
-  private static <T> Predicate<T> distinctByKey(@NotNull Function<? super T, ?> keyExtractor) {
-    Set<Object> seen = new HashSet<>();
-    return t -> seen.add(keyExtractor.apply(t));
   }
 
   @NotNull

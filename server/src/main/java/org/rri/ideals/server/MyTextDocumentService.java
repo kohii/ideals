@@ -3,6 +3,7 @@ package org.rri.ideals.server;
 import com.google.gson.GsonBuilder;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.CompletableFutures;
@@ -13,6 +14,8 @@ import org.rri.ideals.server.codeactions.ActionData;
 import org.rri.ideals.server.codeactions.CodeActionService;
 import org.rri.ideals.server.completions.CompletionService;
 import org.rri.ideals.server.extensions.ClassFileContentsCommand;
+import org.rri.ideals.server.extensions.Runnable;
+import org.rri.ideals.server.extensions.RunnablesCommand;
 import org.rri.ideals.server.formatting.FormattingCommand;
 import org.rri.ideals.server.formatting.OnTypeFormattingCommand;
 import org.rri.ideals.server.hover.HoverCommand;
@@ -236,13 +239,19 @@ public class MyTextDocumentService implements TextDocumentService, ExperimentalP
 
   @Override
   public CompletableFuture<Hover> hover(HoverParams params) {
-      return new HoverCommand()
+    return new HoverCommand()
               .runAsync(session.getProject(), params.getTextDocument(), params.getPosition());
   }
 
   @Override
   public CompletableFuture<String> classFileContents(TextDocumentIdentifier params) {
     return new ClassFileContentsCommand()
+            .runAsync(session.getProject(), params);
+  }
+
+  @Override
+  public CompletableFuture<List<Runnable>> runnables(TextDocumentIdentifier params) {
+    return new RunnablesCommand()
             .runAsync(session.getProject(), params);
   }
 }
