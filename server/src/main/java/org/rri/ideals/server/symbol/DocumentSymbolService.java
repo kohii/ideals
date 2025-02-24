@@ -98,7 +98,7 @@ final public class DocumentSymbolService {
         var maybePsiElement = viewElement.getValue();
         curSymbol.setName(viewElement.getPresentation().getPresentableText());
         if (maybePsiElement instanceof PsiElement psiElement) {
-          if (psiElement.getContainingFile() != psiFile) {
+          if (psiElement.getContainingFile().getOriginalFile() != psiFile) {
             // refers to another file
             return null;
           }
