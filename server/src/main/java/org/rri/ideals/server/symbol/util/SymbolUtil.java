@@ -6,6 +6,7 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.registry.Registry;
 import com.intellij.ui.DeferredIcon;
 import com.intellij.ui.IconManager;
+import com.intellij.ui.PlatformIcons;
 import org.eclipse.lsp4j.SymbolKind;
 import org.jetbrains.annotations.NotNull;
 import org.rri.ideals.server.completions.util.IconUtil;
@@ -28,41 +29,41 @@ public class SymbolUtil {
       if (icon instanceof DeferredIcon deferredIcon) {
         icon = deferredIcon.getBaseIcon();
       }
-      if (IconUtil.compareIcons(icon, AllIcons.Nodes.Method) ||
-          IconUtil.compareIcons(icon, AllIcons.Nodes.AbstractMethod)) {
+      if (IconUtil.compareIcons(icon, AllIcons.Nodes.Method, PlatformIcons.Method) ||
+          IconUtil.compareIcons(icon, AllIcons.Nodes.AbstractMethod, PlatformIcons.AbstractMethod)) {
         kind = SymbolKind.Method;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Module)
-          || IconUtil.compareIcons(icon, AllIcons.Nodes.IdeaModule)
-          || IconUtil.compareIcons(icon, AllIcons.Nodes.JavaModule)
-          || IconUtil.compareIcons(icon, AllIcons.Nodes.ModuleGroup)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Module, "nodes/Module.svg")
+          || IconUtil.compareIcons(icon, AllIcons.Nodes.IdeaModule, PlatformIcons.IdeaModule)
+          || IconUtil.compareIcons(icon, AllIcons.Nodes.JavaModule, PlatformIcons.JavaModule)
+          || IconUtil.compareIcons(icon, AllIcons.Nodes.ModuleGroup, "nodes/moduleGroup.svg")) {
         kind = SymbolKind.Module;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Function)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Function, PlatformIcons.Function)) {
         kind = SymbolKind.Function;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Interface) ||
-          IconUtil.compareIcons(icon, iconManager.tooltipOnlyIfComposite(AllIcons.Nodes.Interface))) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Interface, PlatformIcons.Interface) ||
+          IconUtil.compareIcons(icon, iconManager.tooltipOnlyIfComposite(AllIcons.Nodes.Interface), PlatformIcons.Interface)) {
         kind = SymbolKind.Interface;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Type)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Type, "nodes/type.svg")) {
         kind = SymbolKind.TypeParameter;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Property)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Property, PlatformIcons.Property)) {
         kind = SymbolKind.Property;
-      } else if (IconUtil.compareIcons(icon, AllIcons.FileTypes.Any_type)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.FileTypes.Any_type, "fileTypes/any_type.svg")) {
         kind = SymbolKind.File;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Enum)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Enum, PlatformIcons.Enum)) {
         kind = SymbolKind.Enum;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Variable) ||
-          IconUtil.compareIcons(icon, AllIcons.Nodes.Parameter) ||
-          IconUtil.compareIcons(icon, AllIcons.Nodes.NewParameter)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Variable, PlatformIcons.Variable) ||
+          IconUtil.compareIcons(icon, AllIcons.Nodes.Parameter, PlatformIcons.Parameter) ||
+          IconUtil.compareIcons(icon, AllIcons.Nodes.NewParameter, "nodes/newParameter.svg")) {
         kind = SymbolKind.Variable;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Constant)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Constant, "nodes/constant.svg")) {
         kind = SymbolKind.Constant;
       } else if (
-          IconUtil.compareIcons(icon, AllIcons.Nodes.Class) ||
+          IconUtil.compareIcons(icon, AllIcons.Nodes.Class, PlatformIcons.Class) ||
               IconUtil.compareIcons(icon,
-                  iconManager.tooltipOnlyIfComposite(AllIcons.Nodes.Class)) ||
-              IconUtil.compareIcons(icon, AllIcons.Nodes.Class) ||
-              IconUtil.compareIcons(icon, AllIcons.Nodes.AbstractClass)) {
+                  iconManager.tooltipOnlyIfComposite(AllIcons.Nodes.Class), PlatformIcons.Class) ||
+              IconUtil.compareIcons(icon, AllIcons.Nodes.Class, PlatformIcons.Class) ||
+              IconUtil.compareIcons(icon, AllIcons.Nodes.AbstractClass, PlatformIcons.AbstractClass)) {
         kind = SymbolKind.Class;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Field)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Field, PlatformIcons.Field)) {
         kind = SymbolKind.Field;
       }
       return kind;

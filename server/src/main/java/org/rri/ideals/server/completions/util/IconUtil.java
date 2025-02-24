@@ -1,24 +1,29 @@
 package org.rri.ideals.server.completions.util;
 
+import com.intellij.openapi.util.DummyIcon;
+import com.intellij.ui.PlatformIcons;
 import com.intellij.ui.icons.CompositeIcon;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.util.Objects;
 
 public class IconUtil {
-  static public boolean compareIcons(@NotNull Icon elementIcon, @NotNull Icon standardIcon) {
-    if (elementIcon.equals(standardIcon)) {
-      return true;
-    }
+  static public boolean compareIcons(@NotNull Icon elementIcon, @NotNull Icon standardIcon, @NotNull PlatformIcons platformIcon) {
+    return compareIcons(elementIcon, standardIcon, platformIcon.toString());
+  }
+
+  static public boolean compareIcons(@NotNull Icon elementIcon, @NotNull Icon standardIcon, @NotNull String iconPath) {
     // in all cases the first icon in CompositeIcons is actually the main icon
-    while (elementIcon instanceof CompositeIcon
-           && ((CompositeIcon) elementIcon).getIconCount() > 0) {
-      if (Objects.requireNonNull(((CompositeIcon) elementIcon).getIcon(0)).equals(standardIcon)) {
-        return true;
+    while (elementIcon instanceof CompositeIcon compositeIcon) {
+      if (compositeIcon.getIconCount() == 0) {
+        break;
       }
-      elementIcon = ((CompositeIcon) elementIcon).getIcon(0);
+
+      elementIcon = compositeIcon.getIcon(0);
     }
-    return false;
+
+    return elementIcon != null &&
+        (elementIcon.equals(standardIcon) ||
+            ((elementIcon instanceof DummyIcon d) && iconPath.equals(d.getOriginalPath())));
   }
 }

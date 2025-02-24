@@ -26,13 +26,13 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.registry.Registry;
-import com.intellij.platform.backend.documentation.DocumentationData;
 import com.intellij.platform.backend.documentation.DocumentationTarget;
 import com.intellij.platform.backend.documentation.impl.ImplKt;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.ui.DeferredIcon;
 import com.intellij.ui.IconManager;
+import com.intellij.ui.PlatformIcons;
 import com.intellij.util.SlowOperations;
 import io.github.furstenheim.CopyDown;
 import org.eclipse.lsp4j.*;
@@ -221,50 +221,50 @@ final public class CompletionService implements Disposable {
       }
       CompletionItemKind kind = null;
       var iconManager = IconManager.getInstance();
-      if (IconUtil.compareIcons(icon, AllIcons.Nodes.Method) ||
-          IconUtil.compareIcons(icon, AllIcons.Nodes.AbstractMethod)) {
+      if (IconUtil.compareIcons(icon, AllIcons.Nodes.Method, PlatformIcons.Method) ||
+          IconUtil.compareIcons(icon, AllIcons.Nodes.AbstractMethod, PlatformIcons.AbstractMethod)) {
         kind = CompletionItemKind.Method;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Module)
-          || IconUtil.compareIcons(icon, AllIcons.Nodes.IdeaModule)
-          || IconUtil.compareIcons(icon, AllIcons.Nodes.JavaModule)
-          || IconUtil.compareIcons(icon, AllIcons.Nodes.ModuleGroup)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Module, "nodes/Module.svg")
+          || IconUtil.compareIcons(icon, AllIcons.Nodes.IdeaModule, PlatformIcons.IdeaModule)
+          || IconUtil.compareIcons(icon, AllIcons.Nodes.JavaModule, PlatformIcons.JavaModule)
+          || IconUtil.compareIcons(icon, AllIcons.Nodes.ModuleGroup, "nodes/moduleGroup.svg")) {
         kind = CompletionItemKind.Module;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Function)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Function, PlatformIcons.Function)) {
         kind = CompletionItemKind.Function;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Interface) ||
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Interface, PlatformIcons.Interface) ||
           IconUtil.compareIcons(icon,
-              iconManager.tooltipOnlyIfComposite(AllIcons.Nodes.Interface))) {
+              iconManager.tooltipOnlyIfComposite(AllIcons.Nodes.Interface), PlatformIcons.Interface)) {
         kind = CompletionItemKind.Interface;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Folder)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Folder, PlatformIcons.Folder)) {
         kind = CompletionItemKind.Folder;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.MethodReference)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.MethodReference, PlatformIcons.MethodReference)) {
         kind = CompletionItemKind.Reference;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.TextArea)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.TextArea, "nodes/textArea.svg")) {
         kind = CompletionItemKind.Text;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Type)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Type, "nodes/type.svg")) {
         kind = CompletionItemKind.TypeParameter;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Property)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Property, PlatformIcons.Property)) {
         kind = CompletionItemKind.Property;
-      } else if (IconUtil.compareIcons(icon, AllIcons.FileTypes.Any_type) /* todo can we find that?*/) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.FileTypes.Any_type, "fileTypes/anyType.svg") /* todo can we find that?*/) {
         kind = CompletionItemKind.File;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Enum)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Enum, PlatformIcons.Enum)) {
         kind = CompletionItemKind.Enum;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Variable) ||
-          IconUtil.compareIcons(icon, AllIcons.Nodes.Parameter) ||
-          IconUtil.compareIcons(icon, AllIcons.Nodes.NewParameter)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Variable, PlatformIcons.Variable) ||
+          IconUtil.compareIcons(icon, AllIcons.Nodes.Parameter, PlatformIcons.Parameter) ||
+          IconUtil.compareIcons(icon, AllIcons.Nodes.NewParameter, "nodes/newParameter.svg")) {
         kind = CompletionItemKind.Variable;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Constant)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Constant, "nodes/constant.svg")) {
         kind = CompletionItemKind.Constant;
       } else if (
-          IconUtil.compareIcons(icon, AllIcons.Nodes.Class) ||
+          IconUtil.compareIcons(icon, AllIcons.Nodes.Class, PlatformIcons.Class) ||
               IconUtil.compareIcons(icon,
-                  iconManager.tooltipOnlyIfComposite(AllIcons.Nodes.Class)) ||
-              IconUtil.compareIcons(icon, AllIcons.Nodes.Class) ||
-              IconUtil.compareIcons(icon, AllIcons.Nodes.AbstractClass)) {
+                  iconManager.tooltipOnlyIfComposite(AllIcons.Nodes.Class), PlatformIcons.Class) ||
+              IconUtil.compareIcons(icon, AllIcons.Nodes.Class, PlatformIcons.Class) ||
+              IconUtil.compareIcons(icon, AllIcons.Nodes.AbstractClass, PlatformIcons.AbstractClass)) {
         kind = CompletionItemKind.Class;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Field)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Field, PlatformIcons.Field)) {
         kind = CompletionItemKind.Field;
-      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Template)) {
+      } else if (IconUtil.compareIcons(icon, AllIcons.Nodes.Template, "nodes/template.svg")) {
         kind = CompletionItemKind.Snippet;
       }
       resItem.setKind(kind);

@@ -1,8 +1,6 @@
 package org.rri.ideals.server.bootstrap;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.ui.IconManager;
-import com.intellij.ui.icons.CoreIconManager;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.jsonrpc.MessageConsumer;
@@ -40,17 +38,7 @@ public abstract class LspServerRunnerBase {
 
   public CompletableFuture<Void> launch() {
     prepareForListening();
-    if (!isMultiConnection) {
-      // Skip icon manager activation in STDIO mode to avoid UI-related errors
-      LOG.info("Skipping icon manager activation in STDIO mode");
-    } else {
-      try {
-        //noinspection UnstableApiUsage
-        IconManager.Companion.activate(new CoreIconManager());
-      } catch (Throwable e) {
-        LOG.warn("Core icon manager can't be loaded:\n" + e);
-      }
-    }
+
     return CompletableFuture.runAsync(() -> {
       while (true) {
         var serverFuture = connectServer(waitForConnection());
